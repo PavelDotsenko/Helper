@@ -58,6 +58,9 @@ defmodule Helper.ChangesetHelper do
       )
       when is_atom(field) and is_atom(check_field) do
     cond do
+      is_nil(changes[field]) ->
+        changeset
+
       changes[field] == changes[check_field] ->
         changeset
 
