@@ -34,7 +34,7 @@ defmodule Helper.RestHelper do
 
   def prepare(map) when is_map(map) do
     Enum.map(map, fn {key, value} ->
-      value = if key == :password, do: "[SECRET]", else: value
+      value = if key == :password or key == :repassword, do: "[SECRET]", else: value
 
       {key, prepare(value)}
     end)
