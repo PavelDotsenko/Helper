@@ -124,11 +124,11 @@ defmodule Helper.ChangesetHelper do
     end)
   end
 
-  defp operator_handler(field, value, :==), do: field == value
-  defp operator_handler(field, value, :>), do: field > value
-  defp operator_handler(field, value, :<), do: field < value
-  defp operator_handler(field, value, :>=), do: field >= value
-  defp operator_handler(field, value, :<=), do: field <= value
+  defp operator_handler(field, value, :==), do: NaiveDateTime.diff(field, value) == 0
+  defp operator_handler(field, value, :>), do: NaiveDateTime.diff(field, value) > 0
+  defp operator_handler(field, value, :<), do: NaiveDateTime.diff(field, value) < 0
+  defp operator_handler(field, value, :>=), do: NaiveDateTime.diff(field, value) >= 0
+  defp operator_handler(field, value, :<=), do: NaiveDateTime.diff(field, value) <= 0
   defp operator_handler(_field, _value, _), do: true
 
   defp trim_handler(nil), do: nil
