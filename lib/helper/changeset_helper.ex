@@ -9,10 +9,10 @@ defmodule Helper.ChangesetHelper do
         opts \\ %{}
       )
       when is_atom(field) and is_atom(operator) do
-    if is_nil(changes[field]) or is_nil(changes[value]) do
+    if is_nil(changes[field]) or is_nil(value) do
       changeset
     else
-      if operator_handler(changes[field], changes[value], operator) do
+      if operator_handler(changes[field], value, operator) do
         changeset
       else
         message = opts[:message] || "not_valid_datetime"
@@ -124,11 +124,21 @@ defmodule Helper.ChangesetHelper do
     end)
   end
 
-  defp operator_handler(field, value, :==), do: NaiveDateTime.diff(field, value) == 0
-  defp operator_handler(field, value, :>), do: NaiveDateTime.diff(field, value) > 0
-  defp operator_handler(field, value, :<), do: NaiveDateTime.diff(field, value) < 0
-  defp operator_handler(field, value, :>=), do: NaiveDateTime.diff(field, value) >= 0
-  defp operator_handler(field, value, :<=), do: NaiveDateTime.diff(field, value) <= 0
+  defp operator_handler(field, value, :==) when not is_nil(value),
+    do: NaiveDateTime.diff(field, value) == 0
+
+  defp operator_handler(field, value, :>) when not is_nil(value),
+    do: NaiveDateTime.diff(field, value) > 0
+
+  defp operator_handler(field, value, :<) when not is_nil(value),
+    do: NaiveDateTime.diff(field, value) < 0
+
+  defp operator_handler(field, value, :>=) when not is_nil(value),
+    do: NaiveDateTime.diff(field, value) >= 0
+
+  defp operator_handler(field, value, :<=) when not is_nil(value),
+    do: NaiveDateTime.diff(field, value) <= 0
+
   defp operator_handler(_field, _value, _), do: true
 
   defp trim_handler(nil), do: nil
