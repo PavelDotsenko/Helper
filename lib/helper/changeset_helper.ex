@@ -1,7 +1,7 @@
 defmodule Helper.ChangesetHelper do
   import Ecto.Changeset, only: [update_change: 3, validate_format: 4]
 
-  def convert_string_sum_format(%Ecto.Changeset{changes: changes} = changeset, field) do
+  def convert_string_sum_format(%Ecto.Changeset{changes: changes} = changeset, field, opts \\ %{}) do
     if is_nil(changes[field]) do
       changeset
     else
@@ -16,6 +16,13 @@ defmodule Helper.ChangesetHelper do
 
         Regex.match?(~r/^\d+$/, "#{sum}") ->
           %Ecto.Changeset{changeset | changes: Map.put(changes, field, "#{sum}.00")}
+
+        true ->
+          message = opts[:message] || "not_valid_sum"
+          error = [{field, {message, [validation: :convert_string_sum_format]}}]
+
+          changeset
+          |> insert_errors(field, error)
       end
     end
   end
