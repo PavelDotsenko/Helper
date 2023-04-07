@@ -1,6 +1,25 @@
 defmodule Helper.ChangesetHelper do
   import Ecto.Changeset, only: [update_change: 3, validate_format: 4]
 
+  def convert_string_sum_format(%Ecto.Changeset{changes: changes} = changeset, field) do
+    if is_nil(changes[field]) do
+      changeset
+    else
+      sum = String.replace(changes[field], " ", "")
+
+      cond do
+        Regex.match?(~r/\d+\.+\d{2}/, "#{sum}") ->
+          changeset
+
+        Regex.match?(~r/\d+\.+\d{1}/, "#{sum}") ->
+          %Ecto.Changeset{changeset | changes: Map.put(changes, field, "#{sum}.0")}
+
+        Regex.match?(~r/^\d+$/, "#{sum}") ->
+          %Ecto.Changeset{changeset | changes: Map.put(changes, field, "#{sum}.00")}
+      end
+    end
+  end
+
   def validate_date_time(
         %Ecto.Changeset{changes: changes} = changeset,
         field,
