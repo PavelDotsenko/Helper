@@ -132,22 +132,16 @@ defmodule Helper.MnesiaHelper do
 
         data = if first == @table_name, do: any, else: data
 
-        item_data =
-          Enum.reduce(0..(count - 1), [], fn num, acc ->
-            key = Enum.at(@table_struct, num)
-            value = Enum.at(data, num)
 
-            [{key, value}] ++ acc
-          end)
-          |> Map.new()
+        Enum.reduce(0..(count - 1), [], fn num, acc ->
+          key = Enum.at(@table_struct, num)
+          value = Enum.at(data, num)
 
-        try do
-          __MODULE__.__struct__()
+          [{key, value}] ++ acc
+        end)
+        |> Map.new()
 
-          struct(__MODULE__, item_data)
-        rescue
-          _ -> item_data
-        end
+
       end
     end
   end
