@@ -128,6 +128,8 @@ defmodule Helper.ServiceHelper do
         end
       end
 
+      def reqs(is_required, type, custom), do: %{is_required: is_required, type: type, custom: custom}
+
       @doc """
       Accepts a function if there are no errors throw returns the execution result
       If there are still errors, return the result of the error
