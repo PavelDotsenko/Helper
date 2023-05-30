@@ -46,6 +46,89 @@ defmodule Helper.ServiceHelper do
       end
 
       @doc """
+        Validates a map
+         ## Examples
+
+        iex> validate_param(%{"item" => "value"}, %{"item" => %{is_required: true, type: :string}})
+
+        []
+
+        iex> validate_param(
+          %{"item" => "value", "count" => 3},
+          %{
+            "item" => %{is_required: true, type: :integer},
+            "count" => %{is_required: false, custom: {&(&1 == 2), "must be 2"}},
+            "useless" => %{is_required: true}
+            }
+          )
+
+        ["useless is required", "item must be of type integer", "count must be 2"]
+      """
+      def validate_param(params, reqs) do
+        Enum.reduce(reqs, [], fn {key, reqs}, acc ->
+          acc =
+          if Map.get(reqs, :is_required, false) do
+            if is_nil(Map.get(params, key)) do
+              ["#{key} is required" | acc]
+            else
+              acc
+            end
+          else
+            acc
+          end
+          acc =
+          if Map.get(reqs, :type, false) do
+            with param when not is_nil(param) <- Map.get(params, key) do
+              case reqs.type do
+                :string -> is_bitstring(param)
+                :integer -> is_integer(param)
+                :boolean -> is_boolean(param)
+                :float -> is_float(param)
+                :number -> is_number(param)
+                :list -> is_list(param)
+                :map -> is_map(param)
+              end
+              |> if do
+                acc
+              else
+                ["#{key} must be of type #{reqs.type}" | acc]
+              end
+            else
+              _ -> acc
+            end
+          else
+            acc
+          end
+          acc =
+          if Map.get(reqs, :custom, false) do
+            with param when not is_nil(param) <- Map.get(params, key) do
+              try do
+                if elem(reqs.custom, 0).(param) do
+                  acc
+                else
+                  ["#{key} #{elem(reqs.custom, 1)}" | acc]
+                end
+              rescue
+                _ -> acc
+              end
+            else
+              _ -> acc
+            end
+          else
+            acc
+          end
+        end)
+      end
+
+      def validate_param!(params, reqs) do
+        validate_param(params, reqs)
+        |> case do
+          [] -> :ok
+          err -> throw {:error, err}
+        end
+      end
+
+      @doc """
       Accepts a function if there are no errors throw returns the execution result
       If there are still errors, return the result of the error
 
