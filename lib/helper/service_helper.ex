@@ -128,6 +128,10 @@ defmodule Helper.ServiceHelper do
         end
       end
 
+      def reqs(is_required), do: %{is_required: is_required}
+
+      def reqs(is_required, type), do: %{is_required: is_required, type: type}
+
       def reqs(is_required, type, custom), do: %{is_required: is_required, type: type, custom: custom}
 
       @doc """
