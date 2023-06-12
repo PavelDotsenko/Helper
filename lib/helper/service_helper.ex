@@ -79,19 +79,11 @@ defmodule Helper.ServiceHelper do
           acc =
           if Map.get(reqs, :type, false) do
             with param when not is_nil(param) <- Map.get(params, key) do
-              case reqs.type do
-                :string -> is_bitstring(param)
-                :integer -> is_integer(param)
-                :boolean -> is_boolean(param)
-                :float -> is_float(param)
-                :number -> is_number(param)
-                :list -> is_list(param)
-                :map -> is_map(param)
-              end
+              validate_type(param, reqs.type)
               |> if do
                 acc
               else
-                ["#{key} must be of type #{reqs.type}" | acc]
+                [if(is_tuple(reqs.type), do: "each element of #{key} must be of type - #{Regex.replace(~r/\ /, Regex.replace(~r/[^\ \w]+/, inspect(elem(reqs.type, 1)), ""), " of ")}", else: "#{key} must be of type #{reqs.type}") | acc]
               end
             else
               _ -> acc
@@ -125,6 +117,19 @@ defmodule Helper.ServiceHelper do
         |> case do
           [] -> :ok
           err -> throw {:error, err}
+        end
+      end
+
+      defp validate_type(param, type) do
+        case type do
+          type when type in [:string, :bitstring] -> is_bitstring(param)
+          :integer -> is_integer(param)
+          :boolean -> is_boolean(param)
+          :float -> is_float(param)
+          :number -> is_number(param)
+          type when type in [:list, :array, :keylist, :charset] -> is_list(param)
+          type when type in [:map, :object] -> is_map(param)
+          {type, subtype} when type in [:list, :array] -> if(validate_type(param, :list), do: Enum.all?(Enum.map(param, &(validate_type(&1, subtype)))), else: false)
         end
       end
 
