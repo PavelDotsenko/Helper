@@ -10,7 +10,7 @@ defmodule Helper.RedixHelper do
         id = Map.get(params, :id, params["id"])
         if id do
           with {:ok, data} <- Jason.encode(params) do
-            Redix.command(:redix, ["SET", "#{id}_#{@table_name}", data])
+            Redix.command(:redix, ["SET", "#{@table_name}:#{id}", data])
             |> case do
               {:ok, _} -> params
             end
@@ -21,7 +21,7 @@ defmodule Helper.RedixHelper do
       end
 
       def read(id) do
-        Redix.command(:redix, ["GET", "#{id}_#{@table_name}"])
+        Redix.command(:redix, ["GET", "#{@table_name}:#{id}"])
         |> case do
           {:ok, nil} -> nil
           {:ok, data} -> Jason.decode(data, keys: :atoms)
@@ -35,7 +35,7 @@ defmodule Helper.RedixHelper do
       def delete(params) when is_map(params) do
         id = Map.get(params, :id, params["id"])
         if id do
-          Redix.command(:redix, ["DEL", "#{id}_#{@table_name}"])
+          Redix.command(:redix, ["DEL", "#{@table_name}:#{id}"])
           |> case do
             {:ok, _} -> {:ok, "deleted"}
             any -> any
