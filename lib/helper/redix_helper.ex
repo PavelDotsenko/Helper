@@ -6,6 +6,42 @@ defmodule Helper.RedixHelper do
         :ok
       end
 
+      def update(key, value) do
+        with {:ok, _item} -> get(key) do
+          set(key, value)
+        end
+      end
+
+      def insert(key, value) do
+        with {:error, _} -> get(key) do
+          set(key, value)
+        else
+          any -> {:error, "key already exists"}
+        end
+      end
+
+      def delete(key) do
+        Regix.command(:regix, ["DEL", key])
+        {:ok, "del"}
+      end
+
+      def get_keys(fragment \\ "*") do
+        Regix.command(:regix, ["SCAN", "0", "MATCH", fragment, "COUNT", 999999])
+      end
+
+      defp get(key) do
+        Redix.command(:redix, ["GET", key])
+        case do
+          {:ok, nil} -> {:error, "no key found"}
+          {:ok, item} -> {:ok, item}
+        end
+      end
+
+      defp set(key, value) do
+        Redix.command(:redix, ["SET", key, value])
+        {:ok, "set"}
+      end
+
       def write(params) do
         id = Map.get(params, :id, params["id"])
         if id do
