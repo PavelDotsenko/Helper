@@ -9,7 +9,7 @@ defmodule Helper.RedixHelper do
       def write(params) do
         id = Map.get(params, :id, params["id"])
         if id do
-          Redix.command(:redix, ["SET", "#{@table_name}:#{id}", :erlang.term_to_binary()])
+          Redix.command(:redix, ["SET", "#{@table_name}:#{id}", :erlang.term_to_binary(params)])
           |> case do
             {:ok, _} -> params
           end
@@ -21,7 +21,7 @@ defmodule Helper.RedixHelper do
       def write(params, secondary_id) do
         id = Map.get(params, :id, params["id"])
         if id do
-          Redix.command(:redix, ["SET", "#{@table_name}:#{id}:#{secondary_id}", :erlang.term_to_binary()])
+          Redix.command(:redix, ["SET", "#{@table_name}:#{id}:#{secondary_id}", :erlang.term_to_binary(params)])
           |> case do
             {:ok, _} -> params
           end
