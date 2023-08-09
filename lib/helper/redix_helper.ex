@@ -7,13 +7,13 @@ defmodule Helper.RedixHelper do
       end
 
       def update(key, value) do
-        with {:ok, _item} -> get(key) do
+        with {:ok, _item} <- get(key) do
           set(key, value)
         end
       end
 
       def insert(key, value) do
-        with {:error, _} -> get(key) do
+        with {:error, _} <- get(key) do
           set(key, value)
         else
           any -> {:error, "key already exists"}
